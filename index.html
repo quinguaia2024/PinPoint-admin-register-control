@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinPoint Admin - Gerenciamento de Cadastros</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        .status-approved {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .status-rejected {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        .dialog-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .dialog-content {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 border-r border-gray-200 flex-shrink-0">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-800 flex items-center">
+                    <img src="assets/images/pinpoint-ByouH8_s.png" alt="Logo" class="w-8 h-8 mr-2">
+                    PinPoint Admin
+                </h1>
+            </div>
+            <nav class="p-4">
+                <ul>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg bg-blue-50">
+                            <i class="fas fa-tasks mr-3 text-blue-600"></i>
+                            <span class="font-medium">Solicitações</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-100">
+                            <i class="fas fa-map-marked-alt mr-3"></i>
+                            <span>Postos Ativos</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-100">
+                            <i class="fas fa-chart-line mr-3"></i>
+                            <span>Estatísticas</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <header class="bg-white border-b border-gray-200 p-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-800">Solicitações de Cadastro</h2>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <input type="text" placeholder="Pesquisar..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        <button class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-8 h-8 rounded-full mr-2">
+                            <span class="text-sm font-medium">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-6">
+                <!-- Filtros -->
+                <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                    <div class="flex flex-wrap items-center justify-between">
+                        <div class="flex space-x-2 mb-2 sm:mb-0">
+                            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Todos
+                            </button>
+                            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Pendentes
+                            </button>
+                            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Aprovados
+                            </button>
+                            <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Rejeitados
+                            </button>
+                        </div>
+                        <div class="flex items-center">
+                            <label for="sort" class="mr-2 text-sm text-gray-600">Ordenar por:</label>
+                            <select id="sort" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>Mais recentes</option>
+                                <option>Mais antigos</option>
+                                <option>Nome A-Z</option>
+                                <option>Nome Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Solicitações -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card de Solicitação 1 -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+                        <div class="p-5 border-b border-gray-200">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-lg text-gray-800">Posto Ipiranga</h3>
+                                    <p class="text-gray-600 text-sm">Solicitado em: 15/05/2023</p>
+                                </div>
+                                <span class="status-pending text-xs font-medium px-2.5 py-0.5 rounded-full">Pendente</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500 mb-1">Representante</h4>
+                                <p class="text-gray-800">João da Silva</p>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500 mb-1">Localização</h4>
+                                <p class="text-gray-800">Av. Paulista, 1000 - São Paulo/SP</p>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500 mb-1">Tipo de Posto</h4>
+                                <p class="text-gray-800">Gasolina e Diesel</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-5 py-3 flex justify-end space-x-2">
+                            <button class="view-details-btn px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-eye mr-2"></i>Ver Detalhes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card de Solicitação 2 -->
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden card-hover">
+                        <div class="p-5 border-b border-gray-200">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-lg text-gray-800">Posto Shell</h3>
+                                    <p class="text-gray-600 text-sm">Solicitado em: 10/05/2023</p>
+                                </div>
+                                <span class="status-approved text-xs font-medium px-2.5 py-0.5 rounded-full">Aprovado</span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500 mb-1">Representante</h4>
+                                <p class="text-gray-800">Maria Oliveira</p>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500 mb-1">Localização</h4>
+                                <p class="text-gray-800">Rua Augusta, 500 - São Paulo/SP</p>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="text-sm font-medium text-gray-500 mb-1">Tipo de Posto</h4>
+                                <p class="text-gray-800">Gasolina, Diesel e Elétrico</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-5 py-3 flex justify-end space-x-2">
+                            <button class="view-details-btn px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-eye mr-2"></i>Ver Detalhes
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Adicione mais cards conforme necessário -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div id="details-modal" class="fixed inset-0 z-50 hidden dialog-overlay">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl dialog-content">
+                <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-2xl font-bold text-gray-800">Detalhes da Solicitação</h3>
+                        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Informações do Posto</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Nome do Posto</label>
+                                    <p class="mt-1 text-gray-800">Posto Ipiranga</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Representante</label>
+                                    <p class="mt-1 text-gray-800">João da Silva</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Email</label>
+                                    <p class="mt-1 text-gray-800">joao@postoipiranga.com.br</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Telefone</label>
+                                    <p class="mt-1 text-gray-800">(11) 99999-9999</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Endereço</label>
+                                    <p class="mt-1 text-gray-800">Av. Paulista, 1000 - São Paulo/SP</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Tipo de Abastecimento</label>
+                                    <p class="mt-1 text-gray-800">Gasolina e Diesel</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4">Documentos Anexados</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center p-3 border border-gray-200 rounded-lg">
+                                    <i class="fas fa-file-pdf text-red-500 mr-3"></i>
+                                    <div>
+                                        <p class="font-medium text-gray-800">CNPJ.pdf</p>
+                                        <p class="text-xs text-gray-500">2.4 MB</p>
+                                    </div>
+                                    <button class="ml-auto text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center p-3 border border-gray-200 rounded-lg">
+                                    <i class="fas fa-file-image text-green-500 mr-3"></i>
+                                    <div>
+                                        <p class="font-medium text-gray-800">Foto da Fachada.jpg</p>
+                                        <p class="text-xs text-gray-500">1.8 MB</p>
+                                    </div>
+                                    <button class="ml-auto text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center p-3 border border-gray-200 rounded-lg">
+                                    <i class="fas fa-file-contract text-yellow-500 mr-3"></i>
+                                    <div>
+                                        <p class="font-medium text-gray-800">Alvará de Funcionamento.pdf</p>
+                                        <p class="text-xs text-gray-500">3.1 MB</p>
+                                    </div>
+                                    <button class="ml-auto text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4">Aprovação do Cadastro</h4>
+                                <form id="approval-form">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="latitude" class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                                            <input type="text" id="latitude" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: -23.5505">
+                                        </div>
+                                        <div>
+                                            <label for="longitude" class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                                            <input type="text" id="longitude" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: -46.6333">
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label for="official-name" class="block text-sm font-medium text-gray-700 mb-1">Nome Oficial do Posto</label>
+                                            <input type="text" id="official-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ex: Posto Ipiranga - Paulista">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6 flex justify-end space-x-3">
+                                        <button type="button" id="reject-btn" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                            Rejeitar
+                                        </button>
+                                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            Aprovar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script para controle do modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('details-modal');
+            const closeBtn = document.getElementById('close-modal');
+            const viewBtns = document.querySelectorAll('.view-details-btn');
+            
+            // Abrir modal ao clicar em Ver Detalhes
+            viewBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+            
+            // Fechar modal
+            closeBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Fechar ao clicar fora do modal
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Validação do formulário de aprovação
+            const approvalForm = document.getElementById('approval-form');
+            approvalForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const latitude = document.getElementById('latitude').value;
+                const longitude = document.getElementById('longitude').value;
+                const officialName = document.getElementById('official-name').value;
+                
+                if (!latitude || !longitude || !officialName) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+                
+                // Aqui você pode adicionar a lógica para enviar os dados para o servidor
+                console.log('Dados para aprovação:', { latitude, longitude, officialName });
+                
+                // Fechar o modal após envio
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                
+                // Mostrar mensagem de sucesso
+                alert('Posto aprovado com sucesso!');
+            });
+            
+            // Botão de rejeição
+            const rejectBtn = document.getElementById('reject-btn');
+            rejectBtn.addEventListener('click', () => {
+                if (confirm('Tem certeza que deseja rejeitar esta solicitação de cadastro?')) {
+                    // Lógica para rejeição
+                    console.log('Solicitação rejeitada');
+                    modal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                    alert('Solicitação rejeitada com sucesso.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
