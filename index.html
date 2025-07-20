@@ -4,905 +4,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PinPoint Admin - Gerenciamento de Cadastros</title>
+    <title>PinPoint Admin - Login</title>
     <link rel="shortcut icon" href="assets/images/pinpoint-ByouH8_s.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Nunito Sans', sans-serif;
+            background-color: #f8fafc;
         }
-
-        .sidebar {
-            transition: all 0.3s ease;
-            background: linear-gradient(180deg, #1a1f25 0%, #0d1117 100%);
+        
+        .login-container {
+            background: linear-gradient(135deg, #08AE64 0%, #16AE47 100%);
         }
-
-        .card-hover {
+        
+        .login-card {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-
-        .card-hover:hover {
+        
+        .login-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(8, 174, 100, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-
-        .status-pending {
-            background-color: #FFFBEB;
-            color: #B45309;
+        
+        .btn-login {
+            background: #16AE47;
+            transition: all 0.3s ease;
         }
-
-        .status-approved {
-            background-color: #ECFDF5;
-            color: #065F46;
+        
+        .btn-login:hover {
+            background: linear-gradient(135deg, #08AE64, #16AE47);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(8, 174, 100, 0.3);
         }
-
-        .status-rejected {
-            background-color: #FEF2F2;
-            color: #991B1B;
+        
+        .input-field:focus {
+            border-color: #16AE47;
+            box-shadow: 0 0 0 3px rgba(22, 174, 71, 0.2);
         }
-
-        .dialog-overlay {
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            overflow-y: auto;
-        }
-
-        .dialog-content {
+        
+        .toast {
             animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
-
+        
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .btn-primary {
-            background: #16AE47;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #08AE64, #16AE47);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(8, 174, 100, 0.3);
-        }
-
-        .nav-item {
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-        }
-
-        .nav-item:hover,
-        .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.05);
-            border-left-color: #16AE47;
-        }
-
-        .progress-bar {
-            animation: progressAnimation 1s ease-in-out forwards;
-        }
-
-        @keyframes progressAnimation {
-            from {
-                width: 0;
-            }
-
-            to {
-                width: var(--progress-width);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .bounce {
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-    </style>
-    <style>
-           /* Estilos para o dropdown de notificações */
-        .notifications-dropdown {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            width: 320px;
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            z-index: 50;
-            margin-top: 0.5rem;
-        }
-        
-        .notifications-dropdown.show {
-            display: block;
-            animation: fadeInUp 0.2s ease-out;
-        }
-        
-        .notification-item {
-            transition: background-color 0.2s ease;
-        }
-        
-        .notification-item:hover {
-            background-color: #f8fafc;
         }
     </style>
 </head>
 
-<body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <div class="sidebar w-64 flex-shrink-0 text-white">
-            <div class="p-5 border-b border-gray-700 flex items-center">
-                <img src="assets/images/pinpoint-ByouH8_s.png" alt="Logo" class="w-8 h-8 mr-3">
-                <h1 class="text-xl font-bold">PinPoint Admin</h1>
-            </div>
-            <nav class="p-4">
-                <ul>
-                    <li class="mb-1">
-                        <a href="#" class="nav-item active flex items-center p-3 rounded">
-                            <i class="fas fa-tasks mr-3 text-green-400"></i>
-                            <span>Solicitações</span>
-                            <span class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded-full">15</span>
-                        </a>
-                    </li>
-                    <li class="mb-1">
-                        <a href="#" class="nav-item flex items-center p-3 rounded">
-                            <i class="fas fa-map-marked-alt mr-3 text-blue-400"></i>
-                            <span>Postos Ativos</span>
-                        </a>
-                    </li>
-                    <li class="mb-1">
-                        <a href="#" class="nav-item flex items-center p-3 rounded">
-                            <i class="fas fa-chart-line mr-3 text-purple-400"></i>
-                            <span>Estatísticas</span>
-                        </a>
-                    </li>
-                    <li class="mb-1">
-                        <a href="#" class="nav-item flex items-center p-3 rounded">
-                            <i class="fas fa-cog mr-3 text-yellow-400"></i>
-                            <span>Configurações</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
-                <div class="flex items-center">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User"
-                        class="w-10 h-10 rounded-full mr-3">
-                    <div>
-                        <p class="font-medium">Admin User</p>
-                        <p class="text-xs text-gray-400">admin@pinpoint.com</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
-            <header class="bg-white border-b border-gray-200 p-4 shadow-sm">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-800">Solicitações de Cadastro</h2>
-                        <p class="text-sm text-gray-600">Gerencie as solicitações de novos postos</p>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <input type="text" placeholder="Pesquisar..."
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 w-64">
-                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                        </div>
-                        <button
-                            class="notification-btn p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 relative">
-                            <i class="fas fa-bell"></i>
-                            <span
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <main class="p-6">
-                <!-- Status Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500">Aprovados</p>
-                                <h3 class="text-2xl font-bold mt-1">42</h3>
-                            </div>
-                            <i class="fas fa-check-circle text-green-500 text-3xl"></i>
-                        </div>
-                        <div class="mt-3">
-                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-green-500 progress-bar" style="--progress-width: 70%"></div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">+5% em relação ao mês passado</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500">Pendentes</p>
-                                <h3 class="text-2xl font-bold mt-1">15</h3>
-                            </div>
-                            <i class="fas fa-clock text-yellow-500 text-3xl"></i>
-                        </div>
-                        <div class="mt-3">
-                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-yellow-500 progress-bar" style="--progress-width: 25%"></div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">+2 novos hoje</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-sm text-gray-500">Rejeitados</p>
-                                <h3 class="text-2xl font-bold mt-1">8</h3>
-                            </div>
-                            <i class="fas fa-times-circle text-red-500 text-3xl"></i>
-                        </div>
-                        <div class="mt-3">
-                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="h-full bg-red-500 progress-bar" style="--progress-width: 13%"></div>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">-10% em relação ao mês passado</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Filtros e Ações -->
-                <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
-                    <div class="flex flex-wrap items-center justify-between">
-                        <div class="flex space-x-2 mb-3 sm:mb-0">
-                            <button
-                                class="filter-btn active px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none">
-                                Todos
-                            </button>
-                            <button
-                                class="filter-btn px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none"
-                                data-filter="pending">
-                                Pendentes
-                            </button>
-                            <button
-                                class="filter-btn px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none"
-                                data-filter="approved">
-                                Aprovados
-                            </button>
-                            <button
-                                class="filter-btn px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none"
-                                data-filter="rejected">
-                                Rejeitados
-                            </button>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <div class="flex items-center">
-                                <label for="sort" class="mr-2 text-sm text-gray-600">Ordenar:</label>
-                                <select id="sort"
-                                    class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
-                                    <option>Mais recentes</option>
-                                    <option>Mais antigos</option>
-                                    <option>Nome A-Z</option>
-                                    <option>Nome Z-A</option>
-                                </select>
-                            </div>
-                            <button
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                <i class="fas fa-download mr-2"></i> Exportar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lista de Solicitações -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="requests-container">
-                    <!-- Cards serão carregados dinamicamente via JavaScript -->
-                </div>
-
-                <!-- Paginação -->
-                <div class="mt-8 flex justify-center">
-                    <nav class="inline-flex rounded-md shadow-sm">
-                        <button
-                            class="px-3 py-1 rounded-l-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button
-                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-green-600 font-medium">1</button>
-                        <button
-                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</button>
-                        <button
-                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">3</button>
-                           <!-- Dropdown de Notificações -->
-                            <div class="notifications-dropdown">
-                                <div class="p-3 border-b border-gray-200">
-                                    <h4 class="font-semibold text-gray-800">Notificações</h4>
-                                </div>
-                                <div class="max-h-96 overflow-y-auto">
-                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
-                                        <div class="flex">
-                                            <div class="bg-green-100 text-green-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                                                <i class="fas fa-check-circle"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-800">Novo cadastro aprovado</p>
-                                                <p class="text-xs text-gray-500">Posto Ipiranga foi aprovado</p>
-                                                <p class="text-xs text-gray-400 mt-1">há 2 horas</p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
-                                        <div class="flex">
-                                            <div class="bg-blue-100 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                                                <i class="fas fa-info-circle"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-800">Nova solicitação recebida</p>
-                                                <p class="text-xs text-gray-500">Posto Shell aguarda análise</p>
-                                                <p class="text-xs text-gray-400 mt-1">há 5 horas</p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
-                                        <div class="flex">
-                                            <div class="bg-yellow-100 text-yellow-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-800">Documentação incompleta</p>
-                                                <p class="text-xs text-gray-500">Posto BR precisa de mais documentos</p>
-                                                <p class="text-xs text-gray-400 mt-1">ontem</p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="p-3 text-center border-t border-gray-200">
-                                    <a href="#" class="text-sm text-green-600 hover:text-green-800 font-medium">Ver todas as notificações</a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- [Manter resto do header] -->
-                    </div>
-                </div>
-                    </nav>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Modal de Detalhes -->
-    <div id="details-modal" class="fixed inset-0 z-50 hidden dialog-overlay">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto dialog-content">
-                <div class="p-6">
-                    <div class="flex justify-between items-start sticky top-0 bg-white pt-2 pb-4">
-                        <h3 class="text-2xl font-bold text-gray-800">Detalhes da Solicitação</h3>
-                        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                <i class="fas fa-info-circle text-green-500 mr-2"></i> Informações do Posto
-                            </h4>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Nome do Posto</label>
-                                    <p class="mt-1 text-gray-800 font-medium">Posto Ipiranga</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Representante</label>
-                                    <p class="mt-1 text-gray-800">João da Silva</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Email</label>
-                                    <p class="mt-1 text-gray-800">joao@postoipiranga.com.br</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Telefone</label>
-                                    <p class="mt-1 text-gray-800">(11) 99999-9999</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Endereço</label>
-                                    <p class="mt-1 text-gray-800">Av. Paulista, 1000 - São Paulo/SP</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Tipo de Abastecimento</label>
-                                    <p class="mt-1 text-gray-800">Gasolina e Diesel</p>
-                                </div>
-                            </div>
-
-                            <div class="mt-6">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                    <i class="fas fa-map-marker-alt text-green-500 mr-2"></i> Localização
-                                </h4>
-                                <div class="bg-gray-100 rounded-lg overflow-hidden h-48">
-                                    <!-- Mapa placeholder - integrar com Google Maps API na implementação real -->
-                                    <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                        <i class="fas fa-map-marked-alt text-4xl"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                <i class="fas fa-file-alt text-green-500 mr-2"></i> Documentos Anexados
-                            </h4>
-                            <div class="space-y-3" id="documents-container">
-                                <!-- Documentos serão carregados dinamicamente -->
-                            </div>
-
-                            <div class="mt-6">
-                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                                    <i class="fas fa-check-circle text-green-500 mr-2"></i> Aprovação do Cadastro
-                                </h4>
-                                <form id="approval-form">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label for="latitude"
-                                                class="block text-sm font-medium text-gray-700 mb-1">Latitude*</label>
-                                            <div class="relative">
-                                                <input type="text" id="latitude"
-                                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                    placeholder="Ex: -23.5505" required>
-                                                <button type="button"
-                                                    class="absolute right-2 top-2 text-green-600 hover:text-green-800 tooltip"
-                                                    data-tooltip="Obter do mapa">
-                                                    <i class="fas fa-map-marker-alt"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label for="longitude"
-                                                class="block text-sm font-medium text-gray-700 mb-1">Longitude*</label>
-                                            <div class="relative">
-                                                <input type="text" id="longitude"
-                                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                    placeholder="Ex: -46.6333" required>
-                                                <button type="button"
-                                                    class="absolute right-2 top-2 text-green-600 hover:text-green-800 tooltip"
-                                                    data-tooltip="Obter do mapa">
-                                                    <i class="fas fa-map-marker-alt"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="md:col-span-2">
-                                            <label for="official-name"
-                                                class="block text-sm font-medium text-gray-700 mb-1">Nome Oficial do
-                                                Posto*</label>
-                                            <input type="text" id="official-name"
-                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                placeholder="Ex: Posto Ipiranga - Paulista" required>
-                                        </div>
-                                        <div class="md:col-span-2">
-                                            <label for="notes"
-                                                class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
-                                            <textarea id="notes" rows="3"
-                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                placeholder="Adicione observações se necessário"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-6 flex justify-end space-x-3">
-                                        <button type="button" id="reject-btn"
-                                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 flex items-center">
-                                            <i class="fas fa-times mr-2"></i> Rejeitar
-                                        </button>
-                                        <button type="submit"
-                                            class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                            <i class="fas fa-check mr-2"></i> Aprovar
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<body class="min-h-screen flex items-center justify-center p-4">
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 hidden">
-        <div
-            class="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center transform transition-all duration-300 translate-y-10 opacity-0">
-            <i class="fas fa-check-circle mr-2"></i>
-            <span id="toast-message">Operação realizada com sucesso!</span>
+    <div id="toast" class="fixed top-4 right-4 hidden">
+        <div class="bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center toast">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span id="toast-message">Credenciais inválidas!</span>
         </div>
     </div>
-    <script>
-                document.addEventListener('DOMContentLoaded', function() {
-            // [Manter todos os scripts anteriores]
-            
-            // Adicionar controle do dropdown de notificações
-            const notificationBtn = document.querySelector('.notification-btn');
-            const notificationsDropdown = document.querySelector('.notifications-dropdown');
-            
-            notificationBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                notificationsDropdown.classList.toggle('show');
-            });
-            
-            // Fechar dropdown ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!notificationBtn.contains(e.target) && !notificationsDropdown.contains(e.target)) {
-                    notificationsDropdown.classList.remove('show');
-                }
-            });
-            
-            // Fechar dropdown ao rolar a página
-            window.addEventListener('scroll', () => {
-                notificationsDropdown.classList.remove('show');
-            });
-        });
 
-    </script>
-    <script>
-        // Dados simulados - substituir por chamadas API na implementação real
-        const requestsData = [
-            {
-                id: 1,
-                name: "Posto Ipiranga",
-                date: "15/05/2023",
-                status: "pending",
-                representative: "João da Silva",
-                location: "Av. Paulista, 1000 - São Paulo/SP",
-                type: "Gasolina e Diesel",
-                email: "joao@postoipiranga.com.br",
-                phone: "(11) 99999-9999",
-                documents: [
-                    { name: "CNPJ.pdf", type: "pdf", size: "2.4 MB" },
-                    { name: "Foto da Fachada.jpg", type: "image", size: "1.8 MB" },
-                    { name: "Alvará de Funcionamento.pdf", type: "pdf", size: "3.1 MB" }
-                ]
-            },
-            {
-                id: 2,
-                name: "Posto Shell",
-                date: "10/05/2023",
-                status: "approved",
-                representative: "Maria Oliveira",
-                location: "Rua Augusta, 500 - São Paulo/SP",
-                type: "Gasolina, Diesel e Elétrico",
-                email: "maria@postoshell.com.br",
-                phone: "(11) 98888-8888",
-                documents: [
-                    { name: "CNPJ.pdf", type: "pdf", size: "2.1 MB" },
-                    { name: "Licença Ambiental.pdf", type: "pdf", size: "4.2 MB" }
-                ]
-            },
-            {
-                id: 3,
-                name: "Posto BR",
-                date: "20/05/2023",
-                status: "pending",
-                representative: "Carlos Souza",
-                location: "Av. Brasil, 2000 - São Paulo/SP",
-                type: "Todos os combustíveis",
-                email: "carlos@postobr.com.br",
-                phone: "(11) 97777-7777",
-                documents: [
-                    { name: "Contrato Social.pdf", type: "pdf", size: "5.3 MB" },
-                    { name: "Foto do Local.jpg", type: "image", size: "2.5 MB" }
-                ]
-            },
-            {
-                id: 4,
-                name: "Posto Petrobras",
-                date: "05/05/2023",
-                status: "rejected",
-                representative: "Ana Santos",
-                location: "Rua da Consolação, 300 - São Paulo/SP",
-                type: "Gasolina Aditivada",
-                email: "ana@postopetrobras.com.br",
-                phone: "(11) 96666-6666",
-                documents: [
-                    { name: "Documentação Completa.pdf", type: "pdf", size: "8.7 MB" }
-                ],
-                rejectionReason: "Documentação incompleta"
-            }
-        ];
+    <div class="login-container rounded-2xl p-0.5 w-full max-w-md">
+        <div class="bg-white rounded-2xl p-8 login-card">
+            <div class="flex justify-center mb-8">
+                <img src="assets/images/pinpoint-ByouH8_s.png" alt="Logo" class="h-16 w-auto">
+            </div>
+            
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">PinPoint Admin</h1>
+            <p class="text-gray-600 text-center mb-8">Acesse sua conta para continuar</p>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                        </div>
+                        <input type="email" id="email" name="email" required
+                            class="input-field pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="seu@email.com">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-lock text-gray-400"></i>
+                        </div>
+                        <input type="password" id="password" name="password" required
+                            class="input-field pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="••••••••">
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Lembrar de mim</label>
+                    </div>
+                    
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-green-600 hover:text-green-500">Esqueceu sua senha?</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn-login w-full px-6 py-3 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-medium">
+                        Entrar
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-6 relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">Apenas para administradores</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const modal = document.getElementById('details-modal');
-            const closeBtn = document.getElementById('close-modal');
-            const requestsContainer = document.getElementById('requests-container');
-            const documentsContainer = document.getElementById('documents-container');
-            const filterButtons = document.querySelectorAll('.filter-btn');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toast-message');
-
-            let currentFilter = 'all';
-            let currentRequestId = null;
-
-            // Carregar solicitações
-            function loadRequests(filter = 'all') {
-                requestsContainer.innerHTML = '';
-
-                const filteredRequests = filter === 'all'
-                    ? requestsData
-                    : requestsData.filter(req => req.status === filter);
-
-                if (filteredRequests.length === 0) {
-                    requestsContainer.innerHTML = `
-                        <div class="col-span-full text-center py-10">
-                            <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
-                            <p class="text-gray-500">Nenhuma solicitação encontrada</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                filteredRequests.forEach((request, index) => {
-                    const statusClass = {
-                        pending: 'status-pending',
-                        approved: 'status-approved',
-                        rejected: 'status-rejected'
-                    }[request.status];
-
-                    const statusText = {
-                        pending: 'Pendente',
-                        approved: 'Aprovado',
-                        rejected: 'Rejeitado'
-                    }[request.status];
-
-                    const card = document.createElement('div');
-                    card.className = `bg-white rounded-xl shadow-md overflow-hidden card-hover fade-in`;
-                    card.style.animationDelay = `${index * 0.1}s`;
-
-                    card.innerHTML = `
-                        <div class="p-5 border-b border-gray-200">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-bold text-lg text-gray-800">${request.name}</h3>
-                                    <p class="text-gray-600 text-sm">Solicitado em: ${request.date}</p>
-                                </div>
-                                <span class="${statusClass} text-xs font-medium px-2.5 py-0.5 rounded-full">${statusText}</span>
-                            </div>
-                        </div>
-                        <div class="p-5">
-                            <div class="mb-4">
-                                <h4 class="text-sm font-medium text-gray-500 mb-1">Representante</h4>
-                                <p class="text-gray-800">${request.representative}</p>
-                            </div>
-                            <div class="mb-4">
-                                <h4 class="text-sm font-medium text-gray-500 mb-1">Localização</h4>
-                                <p class="text-gray-800">${request.location}</p>
-                            </div>
-                            <div class="mb-4">
-                                <h4 class="text-sm font-medium text-gray-500 mb-1">Tipo de Posto</h4>
-                                <p class="text-gray-800">${request.type}</p>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 px-5 py-3 flex justify-end space-x-2">
-                            <button class="view-details-btn px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-id="${request.id}">
-                                <i class="fas fa-eye mr-2"></i>Ver Detalhes
-                            </button>
-                        </div>
-                    `;
-
-                    requestsContainer.appendChild(card);
-                });
-
-                // Adicionar eventos aos botões de detalhes
-                document.querySelectorAll('.view-details-btn').forEach(btn => {
-                    btn.addEventListener('click', () => openDetailsModal(btn.dataset.id));
-                });
-            }
-
-            // Abrir modal de detalhes
-            function openDetailsModal(requestId) {
-                const request = requestsData.find(req => req.id === parseInt(requestId));
-                if (!request) return;
-
-                currentRequestId = requestId;
-
-                // Carregar documentos
-                documentsContainer.innerHTML = '';
-                request.documents.forEach(doc => {
-                    const iconClass = doc.type === 'pdf' ? 'fa-file-pdf text-red-500' :
-                        doc.type === 'image' ? 'fa-file-image text-green-500' :
-                            'fa-file-alt text-blue-500';
-
-                    const docElement = document.createElement('div');
-                    docElement.className = 'flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition';
-                    docElement.innerHTML = `
-                        <i class="fas ${iconClass} mr-3 text-xl"></i>
-                        <div class="flex-1">
-                            <p class="font-medium text-gray-800">${doc.name}</p>
-                            <p class="text-xs text-gray-500">${doc.size}</p>
-                        </div>
-                        <button class="download-btn ml-2 p-2 text-gray-500 hover:text-green-600 rounded-full hover:bg-gray-100">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="view-btn ml-1 p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-gray-100">
-                            <i class="fas fa-expand"></i>
-                        </button>
-                    `;
-                    documentsContainer.appendChild(docElement);
-                });
-
-                // Se rejeitado, mostrar motivo
-                if (request.status === 'rejected' && request.rejectionReason) {
-                    const rejectionElement = document.createElement('div');
-                    rejectionElement.className = 'mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r';
-                    rejectionElement.innerHTML = `
-                        <div class="flex">
-                            <i class="fas fa-exclamation-circle text-red-500 mr-2 mt-1"></i>
-                            <div>
-                                <h4 class="font-medium text-red-800">Motivo da Rejeição</h4>
-                                <p class="text-sm text-red-600">${request.rejectionReason}</p>
-                            </div>
-                        </div>
-                    `;
-                    documentsContainer.appendChild(rejectionElement);
-                }
-
-                // Mostrar modal
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-
-            // Fechar modal
-            function closeModal() {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-
+            
+            // Credenciais válidas (apenas para demonstração)
+            const validCredentials = {
+                email: "admin@pinpoint.com",
+                password: "admin123"
+            };
+            
             // Mostrar notificação toast
-            function showToast(message, isSuccess = true) {
+            function showToast(message, isError = true) {
                 const toastElement = toast.querySelector('div');
-                toastElement.className = isSuccess
-                    ? 'bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center transform transition-all duration-300'
-                    : 'bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center transform transition-all duration-300';
-
+                toastElement.className = isError
+                    ? 'bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center toast'
+                    : 'bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center toast';
+                
                 toastMessage.textContent = message;
                 toast.classList.remove('hidden');
-
-                // Animação de entrada
+                
+                // Esconder toast após 3 segundos
                 setTimeout(() => {
-                    toastElement.classList.remove('translate-y-10', 'opacity-0');
-                    toastElement.classList.add('translate-y-0', 'opacity-100');
-                }, 10);
-
-                // Animação de saída após 3 segundos
-                setTimeout(() => {
-                    toastElement.classList.remove('translate-y-0', 'opacity-100');
-                    toastElement.classList.add('translate-y-10', 'opacity-0');
-
-                    setTimeout(() => {
-                        toast.classList.add('hidden');
-                    }, 300);
+                    toast.classList.add('hidden');
                 }, 3000);
             }
-
-            // Filtros
-            filterButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (btn.classList.contains('active')) return;
-
-                    filterButtons.forEach(b => b.classList.remove('active', 'bg-green-600', 'text-white'));
-
-                    if (btn.dataset.filter) {
-                        currentFilter = btn.dataset.filter;
-                        btn.classList.add('active', 'bg-green-600', 'text-white');
-                    } else {
-                        currentFilter = 'all';
-                        btn.classList.add('active', 'bg-green-600', 'text-white');
-                    }
-
-                    loadRequests(currentFilter);
-                });
-            });
-
-            // Evento de fechar modal
-            closeBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal();
-            });
-
-            // Formulário de aprovação
-            const approvalForm = document.getElementById('approval-form');
-            approvalForm.addEventListener('submit', (e) => {
+            
+            // Verificar credenciais e redirecionar
+            function authenticate(email, password) {
+                if (email === validCredentials.email && password === validCredentials.password) {
+                    // Credenciais corretas - redirecionar para dashboard
+                    localStorage.setItem('isAuthenticated', 'true');
+                    window.location.href = 'pages/Dashboard/dashboard.html';
+                } else {
+                    // Credenciais incorretas - mostrar erro
+                    showToast('Email ou senha incorretos');
+                }
+            }
+            
+            // Verificar se já está autenticado
+            if (localStorage.getItem('isAuthenticated') === 'true') {
+                window.location.href = 'dashboard.html';
+            }
+            
+            // Evento de submit do formulário
+            loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-
-                const latitude = document.getElementById('latitude').value;
-                const longitude = document.getElementById('longitude').value;
-                const officialName = document.getElementById('official-name').value;
-
-                if (!latitude || !longitude || !officialName) {
-                    showToast('Preencha todos os campos obrigatórios', false);
-                    return;
-                }
-
-                // Simular aprovação
-                const requestIndex = requestsData.findIndex(req => req.id === parseInt(currentRequestId));
-                if (requestIndex !== -1) {
-                    requestsData[requestIndex].status = 'approved';
-                    showToast('Posto aprovado com sucesso!');
-                    loadRequests(currentFilter);
-                    closeModal();
-                }
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                authenticate(email, password);
             });
-
-            // Botão de rejeição
-            const rejectBtn = document.getElementById('reject-btn');
-            rejectBtn.addEventListener('click', () => {
-                const reason = prompt('Digite o motivo da rejeição:');
-                if (reason) {
-                    // Simular rejeição
-                    const requestIndex = requestsData.findIndex(req => req.id === parseInt(currentRequestId));
-                    if (requestIndex !== -1) {
-                        requestsData[requestIndex].status = 'rejected';
-                        requestsData[requestIndex].rejectionReason = reason;
-                        showToast('Posto rejeitado com sucesso');
-                        loadRequests(currentFilter);
-                        closeModal();
-                    }
-                }
-            });
-
-            // Tooltips
-            document.querySelectorAll('.tooltip').forEach(el => {
-                el.addEventListener('mouseover', () => {
-                    const tooltip = document.createElement('div');
-                    tooltip.className = 'absolute z-50 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap';
-                    tooltip.textContent = el.dataset.tooltip;
-                    tooltip.style.top = `${el.offsetTop - 30}px`;
-                    tooltip.style.left = `${el.offsetLeft}px`;
-                    el.appendChild(tooltip);
-
-                    el.addEventListener('mouseout', () => {
-                        tooltip.remove();
-                    }, { once: true });
-                });
-            });
-
-            // Carregar dados iniciais
-            loadRequests();
-
-            // Simular notificação
-            setTimeout(() => {
-                showToast('Bem-vindo ao painel de administração!');
-            }, 1000);
         });
     </script>
 </body>
