@@ -13,11 +13,18 @@
     <style>
         body {
             font-family: 'Nunito Sans', sans-serif;
+            margin: 0;
         }
 
         .sidebar {
             transition: all 0.3s ease;
             background: linear-gradient(180deg, #1a1f25 0%, #0d1117 100%);
+        }
+
+        .sidebar hr {
+            width: 100%;
+            margin: 0;
+            border-color: #374151;
         }
 
         .card-hover {
@@ -121,7 +128,6 @@
         }
 
         @keyframes bounce {
-
             0%,
             100% {
                 transform: translateY(0);
@@ -131,9 +137,7 @@
                 transform: translateY(-5px);
             }
         }
-    </style>
-    <style>
-           /* Estilos para o dropdown de notificações */
+
         .notifications-dropdown {
             display: none;
             position: absolute;
@@ -146,18 +150,86 @@
             z-index: 50;
             margin-top: 0.5rem;
         }
-        
+
         .notifications-dropdown.show {
             display: block;
             animation: fadeInUp 0.2s ease-out;
         }
-        
+
         .notification-item {
             transition: background-color 0.2s ease;
         }
-        
+
         .notification-item:hover {
             background-color: #f8fafc;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: fixed;
+                height: 100%;
+                z-index: 100;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin: 0;
+                padding: 0;
+            }
+
+            .grid-cols-3 {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .header-search {
+                width: 100%;
+            }
+
+            .notifications-dropdown {
+                width: 100%;
+                max-width: 280px;
+                right: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0;
+            }
+
+            .header-search input {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .notifications-dropdown {
+                max-width: 90%;
+                right: 0.25rem;
+            }
+
+            .p-6 {
+                padding: 1rem;
+            }
+
+            .p-4 {
+                padding: 0.75rem;
+            }
+
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .sidebar-toggle,
+            .sidebar-close {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -166,9 +238,14 @@
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar w-64 flex-shrink-0 text-white">
-            <div class="p-5 border-b border-gray-700 flex items-center">
-                <img src="../../assets/images/pinpoint-ByouH8_s.png" alt="Logo" class="w-8 h-8 mr-3">
-                <h1 class="text-xl font-bold">PinPoint Admin</h1>
+            <div class="p-5 border-b border-gray-700 flex items-center justify-between">
+                <div class="flex items-center">
+                    <img src="../../assets/images/pinpoint-ByouH8_s.png" alt="Logo" class="w-8 h-8 mr-3">
+                    <h1 class="text-xl font-bold">PinPoint Admin</h1>
+                </div>
+                <button class="sidebar-close md:hidden p-2 text-white hover:bg-gray-700 rounded">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <nav class="p-4">
                 <ul>
@@ -185,24 +262,12 @@
                             <span>Postos Ativos</span>
                         </a>
                     </li>
-                    <li class="mb-1">
-                        <a href="../statistic/statistic.html" class="nav-item flex items-center p-3 rounded">
-                            <i class="fas fa-chart-line mr-3 text-purple-400"></i>
-                            <span>Estatísticas</span>
-                        </a>
-                    </li>
-                    <li class="mb-1">
-                        <a href="../settings/settings.html" class="nav-item flex items-center p-3 rounded">
-                            <i class="fas fa-cog mr-3 text-yellow-400"></i>
-                            <span>Configurações</span>
-                        </a>
-                    </li>
                 </ul>
             </nav>
-            <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
+            <hr class="border-gray-700">
+            <div class="p-4">
                 <div class="flex items-center">
-                    <img src="../../assets/images/faces/face13.jpg" alt="User"
-                        class="w-10 h-10 rounded-full mr-3">
+                    <img src="../../assets/images/faces/face13.jpg" alt="User" class="w-10 h-10 rounded-full mr-3">
                     <div>
                         <p class="font-medium">Admin User</p>
                         <p class="text-xs text-gray-400">admin@pinpoint.com</p>
@@ -212,32 +277,89 @@
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 overflow-auto">
+        <div class="flex-1 overflow-auto main-content">
             <header class="bg-white border-b border-gray-200 p-4 shadow-sm">
                 <div class="flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-800">Solicitações de Cadastro</h2>
-                        <p class="text-sm text-gray-600">Gerencie as solicitações de novos postos</p>
+                    <div class="flex items-center">
+                        <button class="sidebar-toggle md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded mr-2">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">Solicitações de Cadastro</h2>
+                            <p class="text-sm text-gray-600">Gerencie as solicitações de novos postos</p>
+                        </div>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <div class="relative">
+                        <div class="relative header-search">
                             <input type="text" placeholder="Pesquisar..."
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 w-64">
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 w-64 sm:w-48">
                             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                         </div>
-                        <button
-                            class="notification-btn p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 relative">
-                            <i class="fas fa-bell"></i>
-                            <span
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                        </button>
+                        <div class="relative">
+                            <button class="notification-btn p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                                <i class="fas fa-bell"></i>
+                                <span
+                                    class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            </button>
+                            <!-- Dropdown de Notificações -->
+                            <div class="notifications-dropdown">
+                                <div class="p-3 border-b border-gray-200">
+                                    <h4 class="font-semibold text-gray-800">Notificações</h4>
+                                </div>
+                                <div class="max-h-96 overflow-y-auto">
+                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
+                                        <div class="flex">
+                                            <div
+                                                class="bg-green-100 text-green-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">Novo cadastro aprovado</p>
+                                                <p class="text-xs text-gray-500">Posto Ipiranga foi aprovado</p>
+                                                <p class="text-xs text-gray-400 mt-1">há 2 horas</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
+                                        <div class="flex">
+                                            <div
+                                                class="bg-blue-100 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                                <i class="fas fa-info-circle"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">Nova solicitação recebida</p>
+                                                <p class="text-xs text-gray-500">Posto Shell aguarda análise</p>
+                                                <p class="text-xs text-gray-400 mt-1">há 5 horas</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
+                                        <div class="flex">
+                                            <div
+                                                class="bg-yellow-100 text-yellow-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-800">Documentação incompleta</p>
+                                                <p class="text-xs text-gray-500">Posto BR precisa de mais documentos</p>
+                                                <p class="text-xs text-gray-400 mt-1">ontem</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="p-3 text-center border-t border-gray-200">
+                                    <a href="#" class="text-sm text-green-600 hover:text-green-800 font-medium">Ver todas
+                                        as notificações</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <main class="p-6">
                 <!-- Status Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
                         <div class="flex justify-between">
                             <div>
@@ -331,7 +453,7 @@
                 </div>
 
                 <!-- Lista de Solicitações -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="requests-container">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="requests-container">
                     <!-- Cards serão carregados dinamicamente via JavaScript -->
                 </div>
 
@@ -348,57 +470,6 @@
                             class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</button>
                         <button
                             class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">3</button>
-                           <!-- Dropdown de Notificações -->
-                            <div class="notifications-dropdown">
-                                <div class="p-3 border-b border-gray-200">
-                                    <h4 class="font-semibold text-gray-800">Notificações</h4>
-                                </div>
-                                <div class="max-h-96 overflow-y-auto">
-                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
-                                        <div class="flex">
-                                            <div class="bg-green-100 text-green-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                                                <i class="fas fa-check-circle"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-800">Novo cadastro aprovado</p>
-                                                <p class="text-xs text-gray-500">Posto Ipiranga foi aprovado</p>
-                                                <p class="text-xs text-gray-400 mt-1">há 2 horas</p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
-                                        <div class="flex">
-                                            <div class="bg-blue-100 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                                                <i class="fas fa-info-circle"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-800">Nova solicitação recebida</p>
-                                                <p class="text-xs text-gray-500">Posto Shell aguarda análise</p>
-                                                <p class="text-xs text-gray-400 mt-1">há 5 horas</p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <a href="#" class="notification-item block p-3 border-b border-gray-100">
-                                        <div class="flex">
-                                            <div class="bg-yellow-100 text-yellow-600 rounded-full w-10 h-10 flex items-center justify-center mr-3">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-800">Documentação incompleta</p>
-                                                <p class="text-xs text-gray-500">Posto BR precisa de mais documentos</p>
-                                                <p class="text-xs text-gray-400 mt-1">ontem</p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="p-3 text-center border-t border-gray-200">
-                                    <a href="#" class="text-sm text-green-600 hover:text-green-800 font-medium">Ver todas as notificações</a>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- [Manter resto do header] -->
-                    </div>
-                </div>
                     </nav>
                 </div>
             </main>
@@ -417,7 +488,7 @@
                         </button>
                     </div>
 
-                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
                             <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 <i class="fas fa-info-circle text-green-500 mr-2"></i> Informações do Posto
@@ -454,7 +525,6 @@
                                     <i class="fas fa-map-marker-alt text-green-500 mr-2"></i> Localização
                                 </h4>
                                 <div class="bg-gray-100 rounded-lg overflow-hidden h-48">
-                                    <!-- Mapa placeholder - integrar com Google Maps API na implementação real -->
                                     <div class="w-full h-full flex items-center justify-center text-gray-400">
                                         <i class="fas fa-map-marked-alt text-4xl"></i>
                                     </div>
@@ -467,7 +537,6 @@
                                 <i class="fas fa-file-alt text-green-500 mr-2"></i> Documentos Anexados
                             </h4>
                             <div class="space-y-3" id="documents-container">
-                                <!-- Documentos serão carregados dinamicamente -->
                             </div>
 
                             <div class="mt-6">
@@ -475,7 +544,7 @@
                                     <i class="fas fa-check-circle text-green-500 mr-2"></i> Aprovação do Cadastro
                                 </h4>
                                 <form id="approval-form">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label for="latitude"
                                                 class="block text-sm font-medium text-gray-700 mb-1">Latitude*</label>
@@ -504,7 +573,7 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="md:col-span-2">
+                                        <div class="sm:col-span-2">
                                             <label for="official-name"
                                                 class="block text-sm font-medium text-gray-700 mb-1">Nome Oficial do
                                                 Posto*</label>
@@ -512,7 +581,7 @@
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                                 placeholder="Ex: Posto Ipiranga - Paulista" required>
                                         </div>
-                                        <div class="md:col-span-2">
+                                        <div class="sm:col-span-2">
                                             <label for="notes"
                                                 class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
                                             <textarea id="notes" rows="3"
@@ -548,100 +617,102 @@
             <span id="toast-message">Operação realizada com sucesso!</span>
         </div>
     </div>
+
     <script>
-                document.addEventListener('DOMContentLoaded', function() {
-            // [Manter todos os scripts anteriores]
-            
-            // Adicionar controle do dropdown de notificações
+        document.addEventListener('DOMContentLoaded', function () {
             const notificationBtn = document.querySelector('.notification-btn');
             const notificationsDropdown = document.querySelector('.notifications-dropdown');
-            
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebarClose = document.querySelector('.sidebar-close');
+
             notificationBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 notificationsDropdown.classList.toggle('show');
             });
-            
-            // Fechar dropdown ao clicar fora
+
             document.addEventListener('click', (e) => {
                 if (!notificationBtn.contains(e.target) && !notificationsDropdown.contains(e.target)) {
                     notificationsDropdown.classList.remove('show');
                 }
             });
-            
-            // Fechar dropdown ao rolar a página
+
             window.addEventListener('scroll', () => {
                 notificationsDropdown.classList.remove('show');
             });
-        });
 
-    </script>
-    <script>
-        // Dados simulados - substituir por chamadas API na implementação real
-        const requestsData = [
-            {
-                id: 1,
-                name: "Posto Ipiranga",
-                date: "15/05/2023",
-                status: "pending",
-                representative: "João da Silva",
-                location: "Av. Paulista, 1000 - São Paulo/SP",
-                type: "Gasolina e Diesel",
-                email: "joao@postoipiranga.com.br",
-                phone: "(11) 99999-9999",
-                documents: [
-                    { name: "CNPJ.pdf", type: "pdf", size: "2.4 MB" },
-                    { name: "Foto da Fachada.jpg", type: "image", size: "1.8 MB" },
-                    { name: "Alvará de Funcionamento.pdf", type: "pdf", size: "3.1 MB" }
-                ]
-            },
-            {
-                id: 2,
-                name: "Posto Shell",
-                date: "10/05/2023",
-                status: "approved",
-                representative: "Maria Oliveira",
-                location: "Rua Augusta, 500 - São Paulo/SP",
-                type: "Gasolina, Diesel e Elétrico",
-                email: "maria@postoshell.com.br",
-                phone: "(11) 98888-8888",
-                documents: [
-                    { name: "CNPJ.pdf", type: "pdf", size: "2.1 MB" },
-                    { name: "Licença Ambiental.pdf", type: "pdf", size: "4.2 MB" }
-                ]
-            },
-            {
-                id: 3,
-                name: "Posto BR",
-                date: "20/05/2023",
-                status: "pending",
-                representative: "Carlos Souza",
-                location: "Av. Brasil, 2000 - São Paulo/SP",
-                type: "Todos os combustíveis",
-                email: "carlos@postobr.com.br",
-                phone: "(11) 97777-7777",
-                documents: [
-                    { name: "Contrato Social.pdf", type: "pdf", size: "5.3 MB" },
-                    { name: "Foto do Local.jpg", type: "image", size: "2.5 MB" }
-                ]
-            },
-            {
-                id: 4,
-                name: "Posto Petrobras",
-                date: "05/05/2023",
-                status: "rejected",
-                representative: "Ana Santos",
-                location: "Rua da Consolação, 300 - São Paulo/SP",
-                type: "Gasolina Aditivada",
-                email: "ana@postopetrobras.com.br",
-                phone: "(11) 96666-6666",
-                documents: [
-                    { name: "Documentação Completa.pdf", type: "pdf", size: "8.7 MB" }
-                ],
-                rejectionReason: "Documentação incompleta"
-            }
-        ];
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.add('active');
+            });
 
-        document.addEventListener('DOMContentLoaded', function () {
+            sidebarClose.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+            });
+
+            const requestsData = [
+                {
+                    id: 1,
+                    name: "Posto Ipiranga",
+                    date: "15/05/2023",
+                    status: "pending",
+                    representative: "João da Silva",
+                    location: "Av. Paulista, 1000 - São Paulo/SP",
+                    type: "Gasolina e Diesel",
+                    email: "joao@postoipiranga.com.br",
+                    phone: "(11) 99999-9999",
+                    documents: [
+                        { name: "CNPJ.pdf", type: "pdf", size: "2.4 MB" },
+                        { name: "Foto da Fachada.jpg", type: "image", size: "1.8 MB" },
+                        { name: "Alvará de Funcionamento.pdf", type: "pdf", size: "3.1 MB" }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: "Posto Shell",
+                    date: "10/05/2023",
+                    status: "approved",
+                    representative: "Maria Oliveira",
+                    location: "Rua Augusta, 500 - São Paulo/SP",
+                    type: "Gasolina, Diesel e Elétrico",
+                    email: "maria@postoshell.com.br",
+                    phone: "(11) 98888-8888",
+                    documents: [
+                        { name: "CNPJ.pdf", type: "pdf", size: "2.1 MB" },
+                        { name: "Licença Ambiental.pdf", type: "pdf", size: "4.2 MB" }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "Posto BR",
+                    date: "20/05/2023",
+                    status: "pending",
+                    representative: "Carlos Souza",
+                    location: "Av. Brasil, 2000 - São Paulo/SP",
+                    type: "Todos os combustíveis",
+                    email: "carlos@postobr.com.br",
+                    phone: "(11) 97777-7777",
+                    documents: [
+                        { name: "Contrato Social.pdf", type: "pdf", size: "5.3 MB" },
+                        { name: "Foto do Local.jpg", type: "image", size: "2.5 MB" }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: "Posto Petrobras",
+                    date: "05/05/2023",
+                    status: "rejected",
+                    representative: "Ana Santos",
+                    location: "Rua da Consolação, 300 - São Paulo/SP",
+                    type: "Gasolina Aditivada",
+                    email: "ana@postopetrobras.com.br",
+                    phone: "(11) 96666-6666",
+                    documents: [
+                        { name: "Documentação Completa.pdf", type: "pdf", size: "8.7 MB" }
+                    ],
+                    rejectionReason: "Documentação incompleta"
+                }
+            ];
+
             const modal = document.getElementById('details-modal');
             const closeBtn = document.getElementById('close-modal');
             const requestsContainer = document.getElementById('requests-container');
@@ -653,7 +724,6 @@
             let currentFilter = 'all';
             let currentRequestId = null;
 
-            // Carregar solicitações
             function loadRequests(filter = 'all') {
                 requestsContainer.innerHTML = '';
 
@@ -722,20 +792,17 @@
                     requestsContainer.appendChild(card);
                 });
 
-                // Adicionar eventos aos botões de detalhes
                 document.querySelectorAll('.view-details-btn').forEach(btn => {
                     btn.addEventListener('click', () => openDetailsModal(btn.dataset.id));
                 });
             }
 
-            // Abrir modal de detalhes
             function openDetailsModal(requestId) {
                 const request = requestsData.find(req => req.id === parseInt(requestId));
                 if (!request) return;
 
                 currentRequestId = requestId;
 
-                // Carregar documentos
                 documentsContainer.innerHTML = '';
                 request.documents.forEach(doc => {
                     const iconClass = doc.type === 'pdf' ? 'fa-file-pdf text-red-500' :
@@ -760,7 +827,6 @@
                     documentsContainer.appendChild(docElement);
                 });
 
-                // Se rejeitado, mostrar motivo
                 if (request.status === 'rejected' && request.rejectionReason) {
                     const rejectionElement = document.createElement('div');
                     rejectionElement.className = 'mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r';
@@ -776,18 +842,15 @@
                     documentsContainer.appendChild(rejectionElement);
                 }
 
-                // Mostrar modal
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
             }
 
-            // Fechar modal
             function closeModal() {
                 modal.classList.add('hidden');
                 document.body.style.overflow = 'auto';
             }
 
-            // Mostrar notificação toast
             function showToast(message, isSuccess = true) {
                 const toastElement = toast.querySelector('div');
                 toastElement.className = isSuccess
@@ -797,13 +860,11 @@
                 toastMessage.textContent = message;
                 toast.classList.remove('hidden');
 
-                // Animação de entrada
                 setTimeout(() => {
                     toastElement.classList.remove('translate-y-10', 'opacity-0');
                     toastElement.classList.add('translate-y-0', 'opacity-100');
                 }, 10);
 
-                // Animação de saída após 3 segundos
                 setTimeout(() => {
                     toastElement.classList.remove('translate-y-0', 'opacity-100');
                     toastElement.classList.add('translate-y-10', 'opacity-0');
@@ -814,7 +875,6 @@
                 }, 3000);
             }
 
-            // Filtros
             filterButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     if (btn.classList.contains('active')) return;
@@ -833,13 +893,11 @@
                 });
             });
 
-            // Evento de fechar modal
             closeBtn.addEventListener('click', closeModal);
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal();
             });
 
-            // Formulário de aprovação
             const approvalForm = document.getElementById('approval-form');
             approvalForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -853,7 +911,6 @@
                     return;
                 }
 
-                // Simular aprovação
                 const requestIndex = requestsData.findIndex(req => req.id === parseInt(currentRequestId));
                 if (requestIndex !== -1) {
                     requestsData[requestIndex].status = 'approved';
@@ -863,12 +920,10 @@
                 }
             });
 
-            // Botão de rejeição
             const rejectBtn = document.getElementById('reject-btn');
             rejectBtn.addEventListener('click', () => {
                 const reason = prompt('Digite o motivo da rejeição:');
                 if (reason) {
-                    // Simular rejeição
                     const requestIndex = requestsData.findIndex(req => req.id === parseInt(currentRequestId));
                     if (requestIndex !== -1) {
                         requestsData[requestIndex].status = 'rejected';
@@ -880,7 +935,6 @@
                 }
             });
 
-            // Tooltips
             document.querySelectorAll('.tooltip').forEach(el => {
                 el.addEventListener('mouseover', () => {
                     const tooltip = document.createElement('div');
@@ -896,10 +950,8 @@
                 });
             });
 
-            // Carregar dados iniciais
             loadRequests();
 
-            // Simular notificação
             setTimeout(() => {
                 showToast('Bem-vindo ao painel de administração!');
             }, 1000);
