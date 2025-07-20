@@ -9,59 +9,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Nunito Sans', sans-serif;
-            background-color: #f8fafc;
-        }
-        
-        .login-container {
-            background: linear-gradient(135deg, #08AE64 0%, #16AE47 100%);
-        }
-        
-        .login-card {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        
-        .login-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-        
-        .btn-login {
-            background: #16AE47;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-login:hover {
-            background: linear-gradient(135deg, #08AE64, #16AE47);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(8, 174, 100, 0.3);
-        }
-        
-        .input-field:focus {
-            border-color: #16AE47;
-            box-shadow: 0 0 0 3px rgba(22, 174, 71, 0.2);
-        }
-        
-        .toast {
-            animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/login style.css">
 </head>
-
 <body class="min-h-screen flex items-center justify-center p-4">
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-4 right-4 hidden">
@@ -70,7 +19,6 @@
             <span id="toast-message">Credenciais inválidas!</span>
         </div>
     </div>
-
     <div class="login-container rounded-2xl p-0.5 w-full max-w-md">
         <div class="bg-white rounded-2xl p-8 login-card">
             <div class="flex justify-center mb-8">
@@ -104,8 +52,6 @@
                             placeholder="••••••••">
                     </div>
                 </div>
-
-                
                 <div>
                     <button type="submit" class="btn-login w-full px-6 py-3 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-medium">
                         Entrar
@@ -123,63 +69,7 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toast-message');
-            
-            // Credenciais válidas (apenas para demonstração)
-            const validCredentials = {
-                email: "admin@pinpoint.com",
-                password: "1234"
-            };
-            
-            // Mostrar notificação toast
-            function showToast(message, isError = true) {
-                const toastElement = toast.querySelector('div');
-                toastElement.className = isError
-                    ? 'bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center toast'
-                    : 'bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center toast';
-                
-                toastMessage.textContent = message;
-                toast.classList.remove('hidden');
-                
-                // Esconder toast após 3 segundos
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 3000);
-            }
-            
-            // Verificar credenciais e redirecionar
-            function authenticate(email, password) {
-                if (email === validCredentials.email && password === validCredentials.password) {
-                    // Credenciais corretas - redirecionar para dashboard
-                    localStorage.setItem('isAuthenticated', 'true');
-                    window.location.href = 'pages/Dashboard/dashboard.html';
-                } else {
-                    // Credenciais incorretas - mostrar erro
-                    showToast('Email ou senha incorretos');
-                }
-            }
-            
-            // Verificar se já está autenticado
-            if (localStorage.getItem('isAuthenticated') === 'true') {
-                window.location.href = 'dashboard.html';
-            }
-            
-            // Evento de submit do formulário
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                
-                authenticate(email, password);
-            });
-        });
-    </script>
+    <script src="assets/js/login.js"></script>
 </body>
 
 </html>
