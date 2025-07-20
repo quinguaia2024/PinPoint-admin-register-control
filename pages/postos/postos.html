@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PinPoint Admin - Postos Ativos</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+        }
+
+        .sidebar {
+            transition: all 0.3s ease;
+            background: linear-gradient(180deg, #1a1f25 0%, #0d1117 100%);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(8, 174, 100, 0.1);
+        }
+
+        .status-active {
+            background-color: #ECFDF5;
+            color: #065F46;
+        }
+
+        .status-inactive {
+            background-color: #FEF2F2;
+            color: #991B1B;
+        }
+
+        .dialog-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+        }
+
+        .dialog-content {
+            animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-primary {
+            background: #16AE47;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #08AE64, #16AE47);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(8, 174, 100, 0.3);
+        }
+
+        .nav-item {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: #16AE47;
+        }
+
+        .sidebar-border {
+            border-bottom-width: 1px;
+            width: calc(100% - 2rem);
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+
+        .notifications-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 320px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            margin-top: 0.5rem;
+        }
+
+        .notifications-dropdown.show {
+            display: block;
+            animation: fadeInUp 0.2s ease-out;
+        }
+
+        .notification-item {
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .map-container {
+            height: 300px;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 flex-shrink-0 text-white">
+            <div class="p-5 flex items-center">
+                <img src="../../assets/images/pinpoint-ByouH8_s.png" alt="Logo" class="w-8 h-8 mr-3">
+                <h1 class="text-xl font-bold">PinPoint Admin</h1>
+            </div>
+            <div class="sidebar-border border-gray-700"></div>
+            <nav class="p-4">
+                <ul>
+                    <li class="mb-1">
+                        <a href="../Dashboard/dashboard.html" class="nav-item flex items-center p-3 rounded">
+                            <i class="fas fa-tasks mr-3 text-green-400"></i>
+                            <span>Solicitações</span>
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="postos.html" class="nav-item active flex items-center p-3 rounded">
+                            <i class="fas fa-map-marked-alt mr-3 text-blue-400"></i>
+                            <span>Postos Ativos</span>
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="../statistic/statistic.html" class="nav-item flex items-center p-3 rounded">
+                            <i class="fas fa-chart-line mr-3 text-purple-400"></i>
+                            <span>Estatísticas</span>
+                        </a>
+                    </li>
+                    <li class="mb-1">
+                        <a href="../settings/settings.html" class="nav-item flex items-center p-3 rounded">
+                            <i class="fas fa-cog mr-3 text-yellow-400"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="absolute bottom-0 w-full p-4">
+                <div class="sidebar-border border-gray-700 mb-4"></div>
+                <div class="flex items-center">
+                    <img src="../../assets/images/faces/face13.jpg" alt="User"
+                        class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <p class="font-medium">Admin User</p>
+                        <p class="text-xs text-gray-400">admin@pinpoint.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <header class="bg-white border-b border-gray-200 p-4 shadow-sm">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800">Postos Ativos</h2>
+                        <p class="text-sm text-gray-600">Gerencie os postos cadastrados na plataforma</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <input type="text" placeholder="Pesquisar postos..."
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 w-64">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        <div class="relative">
+                            <button
+                                class="notification-btn p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 relative">
+                                <i class="fas fa-bell"></i>
+                                <span
+                                    class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                            </button>
+                            <div class="notifications-dropdown">
+                                <!-- Conteúdo do dropdown de notificações -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-6">
+                <!-- Estatísticas Rápidas -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Total de Postos</p>
+                                <h3 class="text-2xl font-bold mt-1">142</h3>
+                            </div>
+                            <i class="fas fa-gas-pump text-green-500 text-3xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Postos com Gasolina</p>
+                                <h3 class="text-2xl font-bold mt-1">128</h3>
+                            </div>
+                            <i class="fas fa-fire text-blue-500 text-3xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Postos com Diesel</p>
+                                <h3 class="text-2xl font-bold mt-1">115</h3>
+                            </div>
+                            <i class="fas fa-truck-moving text-yellow-500 text-3xl"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Postos Elétricos</p>
+                                <h3 class="text-2xl font-bold mt-1">27</h3>
+                            </div>
+                            <i class="fas fa-charging-station text-purple-500 text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros e Ações -->
+                <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
+                    <div class="flex flex-wrap items-center justify-between">
+                        <div class="flex space-x-2 mb-3 sm:mb-0">
+                            <button
+                                class="filter-btn active px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none">
+                                Todos
+                            </button>
+                            <button
+                                class="filter-btn px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none"
+                                data-filter="gasolina">
+                                Gasolina
+                            </button>
+                            <button
+                                class="filter-btn px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none"
+                                data-filter="diesel">
+                                Diesel
+                            </button>
+                            <button
+                                class="filter-btn px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none"
+                                data-filter="eletrico">
+                                Elétrico
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="flex items-center">
+                                <label for="sort" class="mr-2 text-sm text-gray-600">Ordenar:</label>
+                                <select id="sort"
+                                    class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                                    <option>Nome A-Z</option>
+                                    <option>Nome Z-A</option>
+                                    <option>Mais recentes</option>
+                                    <option>Mais antigos</option>
+                                </select>
+                            </div>
+                            <button
+                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Adicionar Posto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Postos Ativos -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Nome do Posto
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Localização
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Combustíveis
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Última Atualização
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Ações
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Posto 1 -->
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-gas-pump text-green-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Posto Ipiranga</div>
+                                                <div class="text-sm text-gray-500">CNPJ: 12.345.678/0001-99</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Av. Paulista, 1000</div>
+                                        <div class="text-sm text-gray-500">São Paulo/SP</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex space-x-1">
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Gasolina</span>
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Diesel</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span
+                                            class="status-active px-2 py-1 text-xs font-medium rounded-full">Ativo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        15/05/2023 14:30
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="view-btn text-green-600 hover:text-green-900 mr-3" data-id="1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="edit-btn text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="deactivate-btn text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-toggle-on"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Posto 2 -->
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-charging-station text-purple-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Posto Elétrico</div>
+                                                <div class="text-sm text-gray-500">CNPJ: 98.765.432/0001-11</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Rua Augusta, 500</div>
+                                        <div class="text-sm text-gray-500">São Paulo/SP</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex space-x-1">
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">Elétrico</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span
+                                            class="status-active px-2 py-1 text-xs font-medium rounded-full">Ativo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        10/05/2023 09:15
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="view-btn text-green-600 hover:text-green-900 mr-3" data-id="2">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="edit-btn text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="deactivate-btn text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-toggle-on"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Posto 3 -->
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="flex-shrink-0 h-10 w-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-truck-moving text-yellow-600"></i>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Posto BR</div>
+                                                <div class="text-sm text-gray-500">CNPJ: 45.678.912/0001-34</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Av. Brasil, 2000</div>
+                                        <div class="text-sm text-gray-500">São Paulo/SP</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex space-x-1">
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Gasolina</span>
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Diesel</span>
+                                            <span
+                                                class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">GNV</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span
+                                            class="status-inactive px-2 py-1 text-xs font-medium rounded-full">Inativo</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        20/04/2023 16:45
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="view-btn text-green-600 hover:text-green-900 mr-3" data-id="3">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="edit-btn text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="activate-btn text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-toggle-off"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Paginação -->
+                <div class="mt-6 flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                        Mostrando <span class="font-medium">1</span> a <span class="font-medium">3</span> de <span
+                            class="font-medium">142</span> postos
+                    </div>
+                    <nav class="inline-flex rounded-md shadow-sm">
+                        <button
+                            class="px-3 py-1 rounded-l-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button
+                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-green-600 font-medium">1</button>
+                        <button
+                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">2</button>
+                        <button
+                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">3</button>
+                        <button
+                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">...</button>
+                        <button
+                            class="px-4 py-1 border-t border-b border-gray-300 bg-white text-gray-500 hover:bg-gray-50">10</button>
+                        <button
+                            class="px-3 py-1 rounded-r-lg border border-gray-300 bg-white text-gray-500 hover:bg-gray-50">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </nav>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Posto -->
+    <div id="station-modal" class="fixed inset-0 z-50 hidden dialog-overlay">
+        <div class="flex items-start justify-center min-h-screen p-4 pt-10">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[85vh] overflow-hidden dialog-content">
+                <div class="p-6">
+                    <div class="flex justify-between items-start sticky top-0 bg-white pt-2 pb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">Detalhes do Posto</h3>
+                        <button id="close-station-modal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-info-circle text-green-500 mr-2"></i> Informações do Posto
+                            </h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Nome do Posto</label>
+                                    <p class="mt-1 text-gray-800 font-medium">Posto Ipiranga</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">CNPJ</label>
+                                    <p class="mt-1 text-gray-800">12.345.678/0001-99</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Representante</label>
+                                    <p class="mt-1 text-gray-800">João da Silva</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Email</label>
+                                    <p class="mt-1 text-gray-800">joao@postoipiranga.com.br</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Telefone</label>
+                                    <p class="mt-1 text-gray-800">(11) 99999-9999</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Tipo de Abastecimento</label>
+                                    <div class="mt-1 flex flex-wrap gap-2">
+                                        <span
+                                            class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Gasolina</span>
+                                        <span
+                                            class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Diesel</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-map-marker-alt text-green-500 mr-2"></i> Localização
+                                </h4>
+                                <div class="bg-gray-100 rounded-lg overflow-hidden h-48 map-container">
+                                    <!-- Mapa placeholder - integrar com Google Maps API na implementação real -->
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                        <i class="fas fa-map-marked-alt text-4xl"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3 grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-500">Latitude</label>
+                                        <p class="mt-1 text-gray-800">-23.5635</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-500">Longitude</label>
+                                        <p class="mt-1 text-gray-800">-46.6523</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="block text-sm font-medium text-gray-500">Endereço Completo</label>
+                                    <p class="mt-1 text-gray-800">Av. Paulista, 1000 - Bela Vista, São Paulo - SP,
+                                        01310-100</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-history text-green-500 mr-2"></i> Histórico de Atividades
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-start">
+                                        <div
+                                            class="bg-green-100 text-green-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-check"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Posto ativado</p>
+                                            <p class="text-xs text-gray-500">15/05/2023 14:30</p>
+                                            <p class="text-sm text-gray-600 mt-1">Posto aprovado por Admin User</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-start">
+                                        <div
+                                            class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-edit"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Informações atualizadas</p>
+                                            <p class="text-xs text-gray-500">10/05/2023 09:15</p>
+                                            <p class="text-sm text-gray-600 mt-1">Preços dos combustíveis atualizados
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 border border-gray-200 rounded-lg">
+                                    <div class="flex items-start">
+                                        <div
+                                            class="bg-yellow-100 text-yellow-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-800">Manutenção programada</p>
+                                            <p class="text-xs text-gray-500">05/05/2023 16:20</p>
+                                            <p class="text-sm text-gray-600 mt-1">Posto ficará fechado dia 20/05 para
+                                                manutenção</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-chart-line text-green-500 mr-2"></i> Estatísticas
+                                </h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <p class="text-sm text-gray-500">Avaliação Média</p>
+                                        <div class="flex items-center mt-1">
+                                            <div class="text-yellow-500 mr-2">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star-half-alt"></i>
+                                            </div>
+                                            <span class="font-medium">4.5</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <p class="text-sm text-gray-500">Atualizações/Mês</p>
+                                        <p class="font-medium mt-1">12</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <p class="text-sm text-gray-500">Preço Médio Gasolina</p>
+                                        <p class="font-medium mt-1">R$ 5,89</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded-lg">
+                                        <p class="text-sm text-gray-500">Preço Médio Diesel</p>
+                                        <p class="font-medium mt-1">R$ 4,75</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Controle do dropdown de notificações
+            const notificationBtn = document.querySelector('.notification-btn');
+            const notificationsDropdown = document.querySelector('.notifications-dropdown');
+
+            notificationBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notificationsDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!notificationBtn.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+                    notificationsDropdown.classList.remove('show');
+                }
+            });
+
+            // Controle do modal de detalhes
+            const stationModal = document.getElementById('station-modal');
+            const closeStationModal = document.getElementById('close-station-modal');
+            const viewButtons = document.querySelectorAll('.view-btn');
+
+            viewButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    stationModal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            closeStationModal.addEventListener('click', () => {
+                stationModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            });
+
+            stationModal.addEventListener('click', (e) => {
+                if (e.target === stationModal) {
+                    stationModal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // Controle dos botões de ativar/desativar
+            const deactivateButtons = document.querySelectorAll('.deactivate-btn');
+            const activateButtons = document.querySelectorAll('.activate-btn');
+
+            deactivateButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (confirm('Tem certeza que deseja desativar este posto?')) {
+                        // Lógica para desativar o posto
+                        btn.innerHTML = '<i class="fas fa-toggle-off"></i>';
+                        btn.classList.remove('deactivate-btn');
+                        btn.classList.add('activate-btn');
+
+                        // Atualizar o status na tabela
+                        const row = btn.closest('tr');
+                        const statusCell = row.querySelector('td:nth-child(4)');
+                        statusCell.innerHTML = '<span class="status-inactive px-2 py-1 text-xs font-medium rounded-full">Inativo</span>';
+                    }
+                });
+            });
+
+            activateButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (confirm('Tem certeza que deseja ativar este posto?')) {
+                        // Lógica para ativar o posto
+                        btn.innerHTML = '<i class="fas fa-toggle-on"></i>';
+                        btn.classList.remove('activate-btn');
+                        btn.classList.add('deactivate-btn');
+
+                        // Atualizar o status na tabela
+                        const row = btn.closest('tr');
+                        const statusCell = row.querySelector('td:nth-child(4)');
+                        statusCell.innerHTML = '<span class="status-active px-2 py-1 text-xs font-medium rounded-full">Ativo</span>';
+                    }
+                });
+            });
+
+            // Filtros
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterButtons.forEach(b => b.classList.remove('active', 'bg-green-600', 'text-white'));
+                    btn.classList.add('active', 'bg-green-600', 'text-white');
+                    // Lógica para filtrar os postos (implementar conforme necessidade)
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
